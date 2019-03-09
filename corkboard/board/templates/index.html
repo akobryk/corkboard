@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Board</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css"> -->
+</head>
+<body>
+    <div id="app">
+    <nav>
+        <div class="container">
+            <h1>Board</h1>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row search">
+            <form v-on:submit.prevent="getFilteredAdverts()">
+                <input type="text" id="search" v-model="filterQuery.search">
+                <input type="number" id="price" v-model="filterQuery.price">
+                <select v-model="filterQuery.ordering">
+                    <option value="created_on">Old</option>
+                    <option value="-created_on">New</option>
+                </select>
+                <button>Submit</button>
+            </form>
+        </div>
+    </div>
+        <div class="container">
+            <div class="row">
+            <div class="col">
+                    <div v-for="advert in advertResults" class="d-flex">
+                        <div class="mt-5">
+                            <a href="#">
+                                <span>
+                                    <img v-if="advert.image" :src="advert.image" alt="image" class="img-fluid" style="width: 200px; height: 200px;">
+                                    <img v-else src="{% static 'img/no-image.jpg' %}" alt="image" class="img-fluid" style="width: 200px; height: 200px;">
+                                </span>
+                            </a>
+                        </div>
+                        <div class="ml-5 mt-5">
+                        <p><b><a href="#">${ advert.title }</a></b></p>
+                        <p>${ advert.category } <b>${ advert.price }</b></p>
+                        <p>${ advert.content|truncate(50) }</p>
+                        <p>Tags: ${ advert.tags }</p>
+                        <p><i class="far fa-clock"></i> ${ advert.created_on|format_date('DD.MM.YYYY HH:mm') }</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col" v-show="getPageRange()">
+                    <nav aria-label="...">
+                            <ul class="pagination">
+                                <li class="page-item page-previous disabled">
+                                <a class="page-link" href="#" @click="getPage('previous')" tabindex="-1">Previous</a>
+                                </li>
+                                <li v-for="page in getPageRange()" class="page-item page-now">
+                                <a class="page-link" href="#" @click="getPage(page)">${ page } <span class="sr-only">(current)</span></a>
+                                </li>
+                                <li class="page-item page-next">
+                                <a class="page-link" href="#" @click="getPage('next')">Next</a>
+                                </li>
+                            </ul>
+                    </nav>
+                </div>
+
+            </div>
+            </div>
+    </div>
+<script src="//code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/sugar/2.0.6/sugar.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+<script type="text/javascript" defer>
+    Vue.http.headers.common['X-CSRFToken'] = "{{ csrf_token }}";
+    Vue.http.interceptors.push((request, next) => {
+          request.headers.set('Authorization', 'Token {{ request.user.auth_token.key }}');
+          request.headers.set('Accept', 'application/json');
+          next()
+        });
+</script>
+<script defer src="{% static 'scripts/app.js' %}"></script>
+</body>
+</html>
